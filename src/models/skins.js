@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const skinsSchema = mongoose.Schema({
-    id: {type: Number},
+    id: {type: Number, unique: true},
     name: {type: String},
     itemShortName: {type: String},
     itemType: {type: String},
@@ -17,7 +17,8 @@ const skinsSchema = mongoose.Schema({
     isCraftable: {type: Boolean},
     isBreakable: {type: Boolean},
     breaksIntoComponents: [{type: Object}],
-    buyPrices: {
+    buyNowPrice: {type: Number},
+    buyPrices: [{
         marketType: {type: String},
         acceptedPayments: {type: String},
         housePrice: {type: Number},
@@ -27,7 +28,7 @@ const skinsSchema = mongoose.Schema({
         supply: {type: Number},
         isAvailable: {type: Boolean},
         url: {type: String}
-    },
+    }],
     isAccepted: {type: Boolean},
     timeAccepted: {type: String},
     timeUpdated: {type: String},

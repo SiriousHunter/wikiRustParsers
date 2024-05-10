@@ -20,7 +20,7 @@ const {
             await models.skins.create(item)
                 .catch(async err => {
                     if (err.code === 11000) {
-                        return this.Items.updateOne({id: item.id}, item);
+                        return models.skins.updateOne({id: item.id}, item);
                     }
 
                     console.error(err.message, item.id);
