@@ -15,7 +15,7 @@ const getCurrentStoreItems = async axios => {
 }
 
 const getItems = async (axios,  items = [], offset = 0) => {
-    const count = 5;
+    const count = 500;
     const {data, status} = await axios.get('/item', { params: {
             start: offset,
             detailed: true,
@@ -27,7 +27,8 @@ const getItems = async (axios,  items = [], offset = 0) => {
         return getItems(axios, items, offset)
     }
 
-    if(items.length < data.total && offset < data.total) {
+    if(items.length < data.total && offset < data.total && offset < 10000) {
+        console.log(`PARSED SKINS: ${offset + count}`)
         return getItems(axios, data.items, offset + count)
     }
 
