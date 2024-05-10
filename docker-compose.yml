@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  nginx:
+    container_name: parser
+    build:
+      context: .
+    volumes:
+      - ./cron:/etc/cron.d/crontab
+    restart: always
