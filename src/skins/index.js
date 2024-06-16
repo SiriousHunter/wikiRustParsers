@@ -17,6 +17,8 @@ const {
         const items = await getItems(axios)
 
         for (const item of items) {
+            item.url = item.name.toLowerCase().trim().replaceAll(' ', '-');
+
             await models.skins.create(item)
                 .catch(async err => {
                     if (err.code === 11000) {
