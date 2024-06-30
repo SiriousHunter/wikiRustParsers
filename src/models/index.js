@@ -1,5 +1,6 @@
 const {mongoose} = require('mongoose');
 const skins = require('./skins');
+const sitemap = require('./sitemap');
 
 const {
     MONGO_USER,
@@ -18,5 +19,6 @@ module.exports = {
     connection,
     models: {
         skins,
+        sitemap,
     }
 }
