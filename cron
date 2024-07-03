@@ -1,1 +1,1 @@
-*/1 * * * * npm run parseSkins
+0 */3 * * * npm run parseSkins

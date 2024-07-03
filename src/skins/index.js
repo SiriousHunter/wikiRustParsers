@@ -52,11 +52,11 @@ const desc = {
                 const data = {
                     path,
                     title: skin.name,
-                    description: des[lang],
+                    description: des,
                     lang,
                     meta: [
                         {property: 'og:title', content: skin.name},
-                        {property: 'og:description', content: des[lang]},
+                        {property: 'og:description', content: des},
                         {property: 'og:type', content: 'article'},
                         {property: 'og:url', content: `${baseLocaleUrl}${route}${skin.url}`},
                         {property: 'twitter:card', content: 'summary'},
