@@ -55,11 +55,11 @@ const desc = {
                     description: des,
                     lang,
                     meta: [
-                        {property: 'og:title', content: skin.name},
-                        {property: 'og:description', content: des},
-                        {property: 'og:type', content: 'article'},
-                        {property: 'og:url', content: `${baseLocaleUrl}${route}${skin.url}`},
-                        {property: 'twitter:card', content: 'summary'},
+                        {type: 'property', property: 'og:title', content: skin.name},
+                        {type: 'property', property: 'og:description', content: des},
+                        {type: 'property', property: 'og:type', content: 'article'},
+                        {type: 'property', property: 'og:url', content: `${baseLocaleUrl}${route}${skin.url}`},
+                        {type: 'name', property: 'twitter:card', content: 'summary'},
                     ],
                     alternate,
                 };
@@ -67,21 +67,20 @@ const desc = {
                 if(skin.previewUrl) {
                     data.image = `${skin.previewUrl}`;
                     data.meta.concat([
-                        {property: 'og:image', content: `${skin.previewUrl}`},
-                        {property: 'twitter:image', content: `${skin.previewUrl}`},
+                        {type: 'property', property: 'og:image', content: `${skin.previewUrl}`},
+                        {type: 'name', property: 'twitter:image', content: `${skin.previewUrl}`},
                     ])
                 }
 
                 await models.sitemap.create(data).catch(()=>({}))
-
             }
-
-
         }
 
         console.log('Skins parsed');
-    }catch (err) {
+    } catch (err) {
         console.error(err?.request?.path, err.message, err?.response?.data)
+    } finally {
+        process.exit();
     }
 })();
 
