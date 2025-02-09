@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fabricio-191/valve-server-query": "^4.1.9",
     "axios": "^1.6.3",
     "mongoose": "^8.3.4"
   }
