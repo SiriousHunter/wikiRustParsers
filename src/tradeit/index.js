@@ -26,7 +26,7 @@ const AFF_CODE = 'aff=RustExplore';
                 $set: {
                     "buyPrices.$[elem].marketType": MARKET_TYPE,
                     "buyPrices.$[elem].acceptedPayments": "Cash",
-                    "buyPrices.$[elem].price": skin.price * 1000,
+                    "buyPrices.$[elem].price": skin.price * 100,
                     "buyPrices.$[elem].fee": 0,
                     "buyPrices.$[elem].supply": skin.count,
                     "buyPrices.$[elem].isAvailable": true,
@@ -43,7 +43,7 @@ const AFF_CODE = 'aff=RustExplore';
                     { $push: { buyPrices: {
                         "marketType": MARKET_TYPE,
                         "acceptedPayments": "Cash",
-                        "price": skin.price,
+                        "price": skin.price * 100,
                         "fee": 0,
                         "supply": skin.count,
                         "isAvailable": true,
