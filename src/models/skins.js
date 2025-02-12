@@ -31,7 +31,8 @@ const skinsSchema = mongoose.Schema({
         fee: {type: Number},
         supply: {type: Number},
         isAvailable: {type: Boolean},
-        url: {type: String}
+        url: {type: String},
+        updatedTime: {type: Date}
     }],
     isAccepted: {type: Boolean},
     timeAccepted: {type: String},
