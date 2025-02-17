@@ -1,2 +1,4 @@
 0 */3 * * * npm run parseSkins
 10 */3 * * * npm run parseTradeit
+20 */3 * * * npm run parseLisSkins
+30 */3 * * * npm run parseAvan

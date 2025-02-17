@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "parseSkins": "node ./src/skins/index.js",
-    "parseTradeit": "node ./src/tradeit/index.js"
+    "parseTradeit": "node ./src/tradeit/index.js",
+    "parseLisSkins": "node ./src/lis-skins/index.js",
+    "parseAvan": "node ./src/avan/index.js"
   },
   "author": "",
   "license": "ISC",
