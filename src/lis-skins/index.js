@@ -53,6 +53,13 @@ const AFF_CODE = 'rf=2642496';
                 );
             }
 
+            await models.skinsHistory.create({
+                name: skin.item,
+                timestamp: new Date(),
+                market: 'lisSkins',
+                buy_price: skin.price * 100,
+                stock: skin.count,
+            })
         }
 
         console.log('LIS-SKINS: skins updated');

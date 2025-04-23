@@ -53,6 +53,15 @@ const AFF_CODE = 'aff=RustExplore';
                 );
             }
 
+            await models.skinsHistory.create({
+                name: skin.item,
+                timestamp: new Date(),
+                market: 'tradeit',
+                buy_price: skin.price * 100,
+                trade_sell_price: skin.depositPrice,
+                trade_buy_price: skin.withdrawPrice,
+                stock: skin.count,
+            })
         }
 
         console.log('TRADEIT: skins updated');

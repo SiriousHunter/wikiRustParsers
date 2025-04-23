@@ -51,8 +51,17 @@ const AFF_CODE = 'r=RustExplore';
                         "buyPrices.$[elem].updatedTime": new Date(),
                     } } }
                 );
+
+
             }
 
+            await models.skinsHistory.create({
+                name: skin.item,
+                timestamp: new Date(),
+                market: 'avan',
+                buy_price: skin.price * 100,
+                stock: skin.count,
+            })
         }
 
         console.log('AVAN: skins updated');

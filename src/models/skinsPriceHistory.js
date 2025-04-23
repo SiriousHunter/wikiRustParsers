@@ -1,3 +1,4 @@
 const mongoose = require('mongoose');
 
-module.exports = mongoose.model('SkinsPriceHistory', {}, 'skinsPriceHistory');
+const schema = mongoose.Schema({}, {strict: false})
+module.exports = mongoose.model('skinsprices', schema, 'skinsprices');
