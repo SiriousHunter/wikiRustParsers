@@ -1,7 +1,6 @@
 const {mongoose} = require('mongoose');
 const skins = require('./skins');
 const sitemap = require('./sitemap');
-const skinsHistory = require('./skinsPriceHistory');
 
 const {
     MONGO_USER,
@@ -21,6 +20,5 @@ module.exports = {
     models: {
         skins,
         sitemap,
-        skinsHistory,
     }
 }
