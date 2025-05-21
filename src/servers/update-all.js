@@ -21,13 +21,21 @@ const {sleep} = require("../utils");
                 new Promise(async (resolve, reject) => {
                     const result = await parseServer(address);
 
-                    const data = {
-                        ...result,
-                        address,
+                    if (result) {
+                        const data = {
+                            ...result,
+                            address,
+                        }
+                        await mongoose.connection.db.collection('servers')
+                            .updateOne({address}, {$set: data}, {upsert: true})
+                            .catch(err => console.log(err));
+
+                        await mongoose.connection.db.collection('servers_players').insertOne({
+                            address,
+                            playersCount: result.numplayers,
+                            timestamp: new Date(),
+                        })
                     }
-                    await mongoose.connection.db.collection('servers')
-                        .updateOne({address}, {$set: data}, {upsert: true})
-                        .catch(err => console.log(err));
 
                     queue.delete(address);
                     resolve();

@@ -33,7 +33,7 @@ async function parseServer(server){
             type: 'rust',
             address,
             port,
-            maxRetries: 6,
+            maxRetries: 10,
             requestRules: true
         })
 
