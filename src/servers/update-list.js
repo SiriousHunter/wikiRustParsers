@@ -9,8 +9,8 @@ const {parseServersList} = require("./methods");
         const serversList = await parseServersList();
 
         if (serversList) {
-            await mongoose.connection.db.collection('servers_list')
-                .insertMany(serversList.map(address => ({address})), {ordered: false});
+            await mongoose.connection.db.collection('servers_lists')
+                .insertMany(serversList.map(address => ({address, nextUpdate: new Date})), {ordered: false});
         }
 
     } catch (error) {

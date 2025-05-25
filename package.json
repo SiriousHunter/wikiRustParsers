@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "parseSkins": "node ./src/skins/index.js"
+    "parseSkins": "node ./src/skins/index.js",
+    "parseServersList": "node ./src/servers/update-list.js",
+    "parseServers": "node ./src/servers/update-all.js"
   },
   "author": "",
   "license": "ISC",
