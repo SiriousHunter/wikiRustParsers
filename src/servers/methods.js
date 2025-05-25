@@ -180,6 +180,8 @@ async function updateServerInfo(data) {
     await mongoose.connection.db.collection('servers_lists')
         .updateOne({address}, {$set: {nextUpdate}}, {upsert: true})
         .catch(err => console.log(err));
+
+    console.log(`[${address}]: Updated`)
 }
 
 async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 30) {
