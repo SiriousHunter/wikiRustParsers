@@ -4,7 +4,7 @@ const {sleep, ServerEvent, EVENTS, areStringArraysEqual, concatDesc, addMinutesT
 const mongoose = require("mongoose");
 
 const APP_ID = 252490;
-const SLEEP_TIME = 10000;
+const SLEEP_TIME = 100000;
 
 async function parseServersList() {
     let servers;
