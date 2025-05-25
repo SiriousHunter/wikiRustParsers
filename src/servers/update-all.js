@@ -8,7 +8,6 @@ const {getAllServersList, updateServersInfo} = require("./methods");
         const serversList = await getAllServersList();
         const retry = 2;
 
-        console.log(`update-all: Total servers: [${serversList.length}]`);
         await updateServersInfo(serversList, retry);
 
     } catch (error) {

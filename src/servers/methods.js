@@ -41,7 +41,7 @@ async function parseServer(server){
 
         return data;
     } catch(err){
-        console.error(err.message);
+        console.error(`[${server}]: ${err.message}`);
     }
 
     return;
@@ -186,6 +186,8 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
     const queue = new Set();
     const serverToRetry = [];
     const step = 10;
+
+    console.log(`update-all: Total servers: [${serversList.length}]. Retries: [${retries}]`);
 
     while(serversList.length) {
         if(queue.size < queueSize) {
