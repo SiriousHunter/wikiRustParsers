@@ -40,7 +40,7 @@ class BaseParser {
                     "buyPrices.$[elem].fee": 0,
                     "buyPrices.$[elem].supply": count,
                     "buyPrices.$[elem].isAvailable": true,
-                    "buyPrices.$[elem].url": `${url}?${this.affCode}`,
+                    "buyPrices.$[elem].url": this.dontUseAff ? url :`${url}?${this.affCode}`,
                     "buyPrices.$[elem].updatedTime": new Date(),
                 }
             }, {
@@ -58,7 +58,7 @@ class BaseParser {
                                 "fee": 0,
                                 "supply": count,
                                 "isAvailable": true,
-                                "url": `${url}?${this.affCode}`,
+                                "url": this.dontUseAff ? url :`${url}?${this.affCode}`,
                                 "buyPrices.$[elem].updatedTime": new Date(),
                             }
                         }
