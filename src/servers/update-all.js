@@ -9,10 +9,7 @@ const {getAllServersList, updateServersInfo} = require("./methods");
         const retry = 2;
 
         await updateServersInfo(serversList, retry);
-
-    } catch (error) {
-        console.error(error.message);
-    }
+    } catch (error) {}
 
     console.log('update-all: DONE')
     process.exit()

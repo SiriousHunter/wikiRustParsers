@@ -4,6 +4,7 @@ const Avan = require('./markets/avan');
 const LisSkins = require('./markets/lis-skins');
 const Tradeit = require('./markets/tradeit');
 const SCMM = require('./markets/scmm');
+const SteamStore = require('./markets/steamstore');
 
 (async () => {
     await connection;
@@ -12,6 +13,7 @@ const SCMM = require('./markets/scmm');
     await Avan.run()
     await LisSkins.run()
     await Tradeit.run()
+    await SteamStore.run()
 
     process.exit()
 })();

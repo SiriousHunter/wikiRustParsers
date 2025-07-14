@@ -18,7 +18,7 @@ const EVENTS = {
 
 class ServerEvent {
     constructor(name, value) {
-        this.timestamp = Date.now();
+        this.timestamp = new Date();
         this.name = name;
         this.value = value;
     }

@@ -17,10 +17,6 @@ async function parseServersList() {
             SLEEP_TIME,
         )
     } catch (error) {
-        console.error(error.message);
-        // await sleep(SLEEP_TIME)
-
-        // servers = await parseServersList(region);?
     }
 
     return servers;
@@ -58,7 +54,6 @@ async function getAllServersList(){
 
     return;
 }
-
 
 async function createEvents(address, server){
     const events = [];
@@ -189,7 +184,10 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
     const serverToRetry = [];
     const step = 10;
 
-    console.log(`update-all: Total servers: [${serversList.length}]. Retries: [${retries}]`);
+    console.log(`update-all: Total servers: [${serversList.length}]. Queue: [${queue.size}]`);
+    setInterval(() => {
+        console.log(`update-all: Queue: [${queue.size}]. Servers: [${serversList.length}]`);
+    }, 30000)
 
     while(serversList.length) {
         if(queue.size < queueSize) {
