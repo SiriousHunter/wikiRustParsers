@@ -29,7 +29,7 @@ class Waxpeer extends BaseParser {
 
         return items.map(skin => ({
             name: skin.name,
-            price: skin.min / 100,
+            price: skin.min / 1000,
             count: skin.count,
             url: `https://waxpeer.com/r/rexplore?game=rust&sort=ASC&order=price&all=0&exact=0&search=${skin.name}`,
         }))
