@@ -5,7 +5,6 @@ class Waxpeer extends BaseParser {
     API_URL = 'https://api.waxpeer.com';
     market = 'waxpeer';
     internalMarket = 'rustexplore:waxpeer';
-    affCode = 'aff=rexplore';
     dontUseAff = true
 
     constructor() {
@@ -31,7 +30,7 @@ class Waxpeer extends BaseParser {
             name: skin.name,
             price: skin.min / 1000,
             count: skin.count,
-            url: `https://waxpeer.com/r/rexplore?game=rust&sort=ASC&order=price&all=0&exact=0&search=${skin.name}`,
+            url: `https://waxpeer.com/r/rexplore?game=rust&sort=ASC&order=price&all=0&exact=0&search=${encodeURIComponent(skin.name)}`,
         }))
     }
 }
