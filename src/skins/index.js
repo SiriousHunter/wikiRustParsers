@@ -10,12 +10,12 @@ const Waxpeer = require('./markets/waxpeer');
 (async () => {
     await connection;
 
-    // await SCMM.run()
-    // await Avan.run()
-    // await LisSkins.run()
+    await SCMM.run()
+    await Avan.run()
+    await LisSkins.run()
     await Tradeit.run()
-    // await SteamStore.run()
-    // await Waxpeer.run()
+    await SteamStore.run()
+    await Waxpeer.run()
 
     process.exit()
 })();
