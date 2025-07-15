@@ -6,6 +6,8 @@ const Tradeit = require('./markets/tradeit');
 const SCMM = require('./markets/scmm');
 const SteamStore = require('./markets/steamstore');
 const Waxpeer = require('./markets/waxpeer');
+const RustTm = require('./markets/rust-tm');
+const LootFarm = require('./markets/loot-farm');
 
 (async () => {
     await connection;
@@ -16,6 +18,8 @@ const Waxpeer = require('./markets/waxpeer');
     await Tradeit.run()
     await SteamStore.run()
     await Waxpeer.run()
+    await RustTm.run()
+    await LootFarm.run()
 
     process.exit()
 })();
