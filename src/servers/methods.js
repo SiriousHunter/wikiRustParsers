@@ -39,9 +39,7 @@ async function parseServer(server){
         })
 
         return data;
-    } catch(err){
-        console.error(`[${server}]: ${err.message}`);
-    }
+    } catch(err){}
 
     return;
 }
