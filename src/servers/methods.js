@@ -241,7 +241,7 @@ async function parseServersInfo(serversList) {
 
             return {
                 query: ip,
-                fields: "query,city,status,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,isp,org,as,asname",
+                fields: "query,city,status,continent,continentCode,country,countryCode,region,regionName,city,lat,lon,isp,org,as,asname",
             }
         });
 
