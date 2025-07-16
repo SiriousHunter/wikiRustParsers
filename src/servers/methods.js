@@ -2,9 +2,10 @@ const {queryMasterServer,REGIONS} = require('steam-server-query');
 const {GameDig} = require("gamedig");
 const {sleep, ServerEvent, EVENTS, areStringArraysEqual, concatDesc, addMinutesToDate} = require("../utils");
 const mongoose = require("mongoose");
+const axios = require("axios");
 
 const APP_ID = 252490;
-const SLEEP_TIME = 100000;
+const SLEEP_TIME = 200000;
 
 async function parseServersList() {
     let servers;
@@ -15,8 +16,10 @@ async function parseServersList() {
             REGIONS.ALL,
             {empty: 1, password: 1, secure: 1, dedicated: 1, appid: APP_ID },
             SLEEP_TIME,
+            5000
         )
     } catch (error) {
+        console.error(error);
     }
 
     return servers;
@@ -228,11 +231,48 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
     }
 }
 
+async function parseServersInfo(serversList) {
+    const result = [];
+
+    while(serversList.length) {
+        const list = serversList.splice(0, 100);
+        const reqList = list.map(address => {
+            const [ip] = address.split(':');
+
+            return {
+                query: ip,
+                fields: "query,city,status,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,isp,org,as,asname",
+            }
+        });
+
+        try{
+            const req = await axios.post('http://ip-api.com/batch', reqList);
+
+            for(let server of req.data) {
+                if(server.status === 'success') {
+                    const {status, query, ...info} = server;
+
+                    result.push({
+                        ...info,
+                        address: query,
+                    });
+                }
+            }
+            await sleep(200)
+        } catch (err) {
+            console.error(err.message);
+        }
+    }
+
+    return result;
+}
+
 module.exports = {
     getAllServersList,
     parseServersList,
     parseServer,
     createEvents,
     updateServerInfo,
-    updateServersInfo
+    updateServersInfo,
+    parseServersInfo,
 }
