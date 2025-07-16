@@ -258,7 +258,7 @@ async function parseServersInfo(serversList) {
                     });
                 }
             }
-            await sleep(3000)
+            await sleep(5000)
         } catch (err) {
             console.error(err.message);
         }
