@@ -1,3 +1,5 @@
 0 * * * * npm run parseSkins
 0 */6 * * * npm run parseServersList
 */10 * * * *  npm run parseServers
+0 */12 * * * npm run agreggateByDay
+0 * * * * npm run agreggateByHour
