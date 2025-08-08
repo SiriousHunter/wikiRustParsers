@@ -73,7 +73,7 @@ const {connection, models} = require('../models');
                     name: "$_id.name",
                     timestamp: "$_id.hourTimestamp",
                     price: { $round: ["$avgPriceAllMarkets", 2] },
-                    stock: "$sumHourlyStocksAcrossMarkets"
+                    stock: { $round: ["$sumHourlyStocksAcrossMarkets"] }
                 }
             },
 
