@@ -6,7 +6,9 @@
   "scripts": {
     "parseSkins": "node ./src/skins/index.js",
     "parseServersList": "node ./src/servers/update-list.js",
-    "parseServers": "node ./src/servers/update-all.js"
+    "parseServers": "node ./src/servers/update-all.js",
+    "agreggateByHour": "node src/skins/aggregateByHour.js",
+    "agreggateByDay": "node src/skins/aggregateByDay.js"
   },
   "author": "",
   "license": "ISC",
