@@ -8,18 +8,21 @@ const APP_ID = 252490;
 const SLEEP_TIME = 200000;
 
 async function parseServersList() {
-    let servers;
+    let servers = [];
 
     try {
-        servers = await queryMasterServer(
-            'hl2master.steampowered.com:27011',
-            REGIONS.ALL,
-            {empty: 1, password: 1, secure: 1, dedicated: 1, appid: APP_ID },
-            SLEEP_TIME,
-            5000
-        )
+        const req = await axios.get(`https://api.steampowered.com/IGameServersService/GetServerList/v1/?filter=\\appid\\252490\\full\\1\\empty\\1&limit=20000&key=${process.env.STEAM_API_KEY}`);
+
+        if (req.data) {
+            const serversList = req.data.response.servers;
+
+            for(let server of serversList) {
+                servers.push(server.addr);
+            }
+        }
+
     } catch (error) {
-        console.error(error);
+        console.log(error.message)
     }
 
     return servers;
@@ -177,7 +180,7 @@ async function updateServerInfo(data) {
         .updateOne({address}, {$set: {nextUpdate}}, {upsert: true})
         .catch(err => console.log(err));
 
-    console.log(`[${address}]: Updated`)
+    // console.log(`[${address}]: Updated`)
 }
 
 async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 30) {
@@ -234,6 +237,8 @@ async function parseServersInfo(serversList) {
 
     while(serversList.length) {
         const list = serversList.splice(0, 100);
+        const addressesInfo = {};
+
         const reqList = list.map(address => {
             const [ip] = address.split(':');
 
@@ -250,12 +255,20 @@ async function parseServersInfo(serversList) {
                 if(server.status === 'success') {
                     const {status, query, ...info} = server;
 
-                    result.push({
-                        ...info,
-                        address: query,
-                    });
+                    addressesInfo[query] = info
                 }
             }
+
+            for(let server of list) {
+                const [ip] = server.split(':');
+                const addressInfo = addressesInfo[ip]
+
+                result.push({
+                    ...addressInfo,
+                    address: server
+                })
+            }
+
             await sleep(5000)
         } catch (err) {
             console.error(err.message);
