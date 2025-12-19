@@ -3,6 +3,27 @@ const {GameDig} = require("gamedig");
 const {sleep, ServerEvent, EVENTS, areStringArraysEqual, concatDesc, addMinutesToDate} = require("../utils");
 const mongoose = require("mongoose");
 const axios = require("axios");
+const { TAG_KEY_ADAPTER } = require('./constants');
+const {
+    getGamemode,
+    getWipesSchedule,
+    getPremium,
+    getPve,
+    getModded,
+    getOxide,
+    getCarbon,
+    getRoleplay,
+    getCreative,
+    getMinigame,
+    getTraining,
+    getBattlefield,
+    getBroyale,
+    getBuilds,
+    getTutorial,
+    getUptime,
+    getPlayersQueue,
+    getDescription,
+} = require('./utils');
 
 const APP_ID = 252490;
 const SLEEP_TIME = 200000;
@@ -49,9 +70,58 @@ async function parseServer(server){
 
 async function getAllServersList(){
     try {
-        const data = await mongoose.connection.db.collection('servers_lists').find({nextUpdate: {$lte: new Date()}}).toArray();
+        const data = await mongoose.connection.db
+            .collection('servers_lists')
+            .aggregate([
+                {
+                    $match: {nextUpdate: {$lte: new Date()}}
+                },
+                {
+                    $lookup: {
+                        from: 'servers',
+                        localField: 'address',
+                        foreignField: 'address',
+                        as: 'server'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$server',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $addFields: {
+                        hasRank: {
+                            $cond: {
+                                if: {
+                                    $and: [
+                                        {$ne: ['$server', null]},
+                                        {$ne: ['$server.rank', null]}
+                                    ]
+                                },
+                                then: 0,
+                                else: 1
+                            }
+                        },
+                        sortRank: {
+                            $ifNull: ['$server.rank', 999999]
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        hasRank: 1,
+                        sortRank: 1
+                    }
+                },
+                {
+                    $limit: 500
+                }
+            ])
+            .toArray();
 
-        return data.map(({address}) => address);
+        return data.map(({address, sortRank, failedAttempts = 0}) => ({address, sortRank, failedAttempts}));
     } catch(err){
         console.error(err.message);
     }
@@ -142,26 +212,40 @@ async function createEvents(address, server){
     return events;
 }
 
-async function updateServerInfo(data) {
+async function updateServerInfo(data, server) {
     const {address} = data;
-    const nextUpdate = new Date();
+    const {failedAttempts} = server;
 
+    const nextUpdate = calcNextUpdate({...server, online: data.online});
+    const newFailedAttempts = data.online ? 0 : failedAttempts + 1;
     const events = await createEvents(address, data);
+
     events.length && await mongoose.connection.db.collection('servers_events').insertMany(events.map(event => ({
         ...event,
         address
     })))
 
-
     if (data.online) {
-        if(data.numplayers > 50) {
-            addMinutesToDate(nextUpdate, 60);
-        } else {
-            addMinutesToDate(nextUpdate, 120);
-        }
+        const tags = getTags(data);
+        const description = getDescription(data);
+        const uptime = getUptime(data);
+        const queuePlayers = getPlayersQueue(data);
+        const gamemode = getGamemode(data);
+        const wipesSchedule = getWipesSchedule(data);
+
+        const updated = new Date();
 
         await mongoose.connection.db.collection('servers')
-            .updateOne({address: data.address}, {$set: data}, {upsert: true})
+            .updateOne({address: data.address}, {$set: {
+                ...data,
+                description,
+                tags,
+                uptime,
+                updated,
+                queuePlayers,
+                gamemode,
+                wipesSchedule,
+            }}, {upsert: true})
             .catch(err => console.log(err));
 
         await mongoose.connection.db.collection('servers_players').insertOne({
@@ -170,17 +254,24 @@ async function updateServerInfo(data) {
             timestamp: new Date(),
         })
     } else {
-        addMinutesToDate(nextUpdate, 180);
-        await mongoose.connection.db.collection('servers')
+        failedAttempts > 3 && await mongoose.connection.db.collection('servers')
             .updateOne({address}, {$set: {online: data.online}}, {upsert: true})
             .catch(err => console.log(err));
     }
 
-    await mongoose.connection.db.collection('servers_lists')
-        .updateOne({address}, {$set: {nextUpdate}}, {upsert: true})
-        .catch(err => console.log(err));
 
-    // console.log(`[${address}]: Updated`)
+    await mongoose.connection.db.collection('servers_lists')
+        .updateOne({address}, {$set: {nextUpdate, failedAttempts: newFailedAttempts}}, {upsert: true})
+        .catch(err => console.log(err));
+}
+
+function getTags(data) {
+    const {raw = {}} = data;
+    const {tags = []} = raw;
+
+    const convertedTags = tags.map(tag => TAG_KEY_ADAPTER[tag]).filter(Boolean).map(tag => tag.toUpperCase());
+
+    return convertedTags;
 }
 
 async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 30) {
@@ -195,10 +286,10 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
 
     while(serversList.length) {
         if(queue.size < queueSize) {
-            const address = serversList.pop();
+            const server = serversList.pop();
+            const {address} = server;
             queue.add(address);
 
-            // console.log(`update-all: Left: [${serversList.length}]`)
             new Promise(async (resolve, reject) => {
                 const result = await parseServer(address);
                 const data = {
@@ -213,7 +304,7 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
                     return;
                 }
 
-                await updateServerInfo(data).finally(() => {
+                await updateServerInfo(data, server).finally(() => {
                     queue.delete(address);
                     resolve()
                 });
@@ -278,6 +369,37 @@ async function parseServersInfo(serversList) {
     return result;
 }
 
+function calcNextUpdate(server) {
+    const {sortRank, failedAttempts, online} = server;
+    let minutes = 0;
+
+    if(!online) {
+        const delay = 2.8 * Math.pow(2, failedAttempts);
+        minutes = Math.min(1440, delay);
+    }else {
+        minutes = intervalMinutesByRank(sortRank);
+    }
+
+    return addMinutesToDate(new Date(), minutes);
+}
+
+function intervalMinutesByRank(rank) {
+    const MIN_MINUTES = 1;
+    const MAX_MINUTES = 30;
+    const RANK_START = 100;
+    const RANK_MAX = 4000;
+
+    if (rank <= RANK_START) return MIN_MINUTES;
+
+    const ratio =
+      Math.log(rank / RANK_START) /
+      Math.log(RANK_MAX / RANK_START);
+
+    const minutes =
+      MIN_MINUTES + (MAX_MINUTES - MIN_MINUTES) * ratio;
+
+    return  Math.ceil(Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, minutes)));
+  }
 module.exports = {
     getAllServersList,
     parseServersList,

@@ -6,7 +6,7 @@ const {getAllServersList, updateServersInfo} = require("./methods");
 
     try {
         const serversList = await getAllServersList();
-        const retry = 2;
+        const retry = 0;
 
         await updateServersInfo(serversList, retry);
     } catch (error) {}
