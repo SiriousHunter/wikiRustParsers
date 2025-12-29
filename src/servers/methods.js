@@ -129,11 +129,11 @@ async function getAllServersList(){
     return;
 }
 
-async function createEvents(address, server){
+async function createEvents(connect, server){
     const events = [];
 
     try {
-        const [data] = await mongoose.connection.db.collection('servers').find({address}).toArray();
+        const [data] = await mongoose.connection.db.collection('servers').find({connect}).toArray();
 
         if (!data) {
             events.push(new ServerEvent(EVENTS.START_MONITORING));
@@ -213,16 +213,16 @@ async function createEvents(address, server){
 }
 
 async function updateServerInfo(data, server) {
-    const {address} = data;
+    const {connect, address} = data;
     const {failedAttempts} = server;
 
     const nextUpdate = calcNextUpdate({...server, online: data.online});
     const newFailedAttempts = data.online ? 0 : failedAttempts + 1;
-    const events = await createEvents(address, data);
+    const events = await createEvents(connect, data);
 
     events.length && await mongoose.connection.db.collection('servers_events').insertMany(events.map(event => ({
         ...event,
-        address
+        address: connect
     })))
 
     if (data.online) {
@@ -236,7 +236,7 @@ async function updateServerInfo(data, server) {
         const updated = new Date();
 
         await mongoose.connection.db.collection('servers')
-            .updateOne({address: data.address}, {$set: {
+            .updateOne({connect}, {$set: {
                 ...data,
                 description,
                 tags,
@@ -249,16 +249,15 @@ async function updateServerInfo(data, server) {
             .catch(err => console.log(err));
 
         await mongoose.connection.db.collection('servers_players').insertOne({
-            address: data.address,
+            address: connect,
             playersCount: data.numplayers,
             timestamp: new Date(),
         })
     } else {
         failedAttempts > 3 && await mongoose.connection.db.collection('servers')
-            .updateOne({address}, {$set: {online: data.online}}, {upsert: true})
+            .updateOne({connect}, {$set: {online: data.online}}, {upsert: true})
             .catch(err => console.log(err));
     }
-
 
     await mongoose.connection.db.collection('servers_lists')
         .updateOne({address}, {$set: {nextUpdate, failedAttempts: newFailedAttempts}}, {upsert: true})
