@@ -30,6 +30,8 @@ const getItems = async (axios,  items = [], offset = 0) => {
     if(items.length < data.total && offset < data.total && offset < 10000) {
         console.log(`PARSED SKINS: ${offset + count}`)
         return getItems(axios, items.concat(data.items), offset + count)
+    }else {
+        items = items.concat(data.items)
     }
 
     return items;
