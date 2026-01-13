@@ -32,7 +32,7 @@ async function parseServersList() {
     let servers = [];
 
     try {
-        const req = await axios.get(`https://api.steampowered.com/IGameServersService/GetServerList/v1/?filter=\\appid\\252490\\full\\1\\empty\\1&limit=20000&key=${process.env.STEAM_API_KEY}`);
+        const req = await axios.get(`https://api.steampowered.com/IGameServersService/GetServerList/v1/?filter=\\appid\\252490\\empty\\1&limit=20000&key=${process.env.STEAM_API_KEY}`);
 
         if (req.data) {
             const serversList = req.data.response.servers;
@@ -254,7 +254,7 @@ async function updateServerInfo(data, server) {
             timestamp: new Date(),
         })
     } else {
-        failedAttempts > 3 && await mongoose.connection.db.collection('servers')
+        failedAttempts > 5 && await mongoose.connection.db.collection('servers')
             .updateOne({connect}, {$set: {online: data.online}}, {upsert: true})
             .catch(err => console.log(err));
     }
@@ -373,7 +373,7 @@ function calcNextUpdate(server) {
     let minutes = 0;
 
     if(!online) {
-        const delay = 2.8 * Math.pow(2, failedAttempts);
+        const delay = 1.8 * Math.pow(2, failedAttempts);
         minutes = Math.min(1440, delay);
     }else {
         minutes = intervalMinutesByRank(sortRank);
@@ -384,8 +384,8 @@ function calcNextUpdate(server) {
 
 function intervalMinutesByRank(rank) {
     const MIN_MINUTES = 1;
-    const MAX_MINUTES = 30;
-    const RANK_START = 60;
+    const MAX_MINUTES = 60;
+    const RANK_START = 30;
     const RANK_MAX = 1000;
 
     if (rank <= RANK_START) return MIN_MINUTES;

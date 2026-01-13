@@ -5,10 +5,6 @@ const {models} = require('../../models')
 
 const LOCALES = ['ru', 'en'];
 const {BASE_URL} = process.env;
-const desc = {
-    ru: 'Актуальная цена в различных магазинах. Обновляется ежедневно',
-    en: 'Current price in various stores. Updated daily',
-};
 
 const getDescription = (skin, locale) => {
     const name = skin.name;
