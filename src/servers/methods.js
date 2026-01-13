@@ -255,7 +255,7 @@ async function updateServerInfo(data, server) {
         })
     } else {
         failedAttempts > 5 && await mongoose.connection.db.collection('servers')
-            .updateOne({connect}, {$set: {online: data.online}}, {upsert: true})
+            .updateOne({address}, {$set: {online: data.online}}, {upsert: true})
             .catch(err => console.log(err));
     }
 
@@ -303,7 +303,11 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
                     return;
                 }
 
-                await updateServerInfo(data, server).finally(() => {
+                await updateServerInfo(data, server)
+                .catch(err => {
+                    console.error(`Error updating server ${address}:`, err.message);
+                })
+                .finally(() => {
                     queue.delete(address);
                     resolve()
                 });
