@@ -399,7 +399,7 @@ function calcNextUpdate(server) {
 }
 
 function intervalMinutesByRank(rank) {
-    const MIN_MINUTES = 2;
+    const MIN_MINUTES = 1;
     const MAX_MINUTES = 60;
     const RANK_START = 30;
     const RANK_MAX = 1000;
