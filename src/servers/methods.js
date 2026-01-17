@@ -214,7 +214,7 @@ async function createEvents(connect, server){
 
 async function updateServerInfo(data, server) {
     const {connect, address} = data;
-    const {failedAttempts} = server;
+    const {failedAttempts = 0} = server;
 
     const nextUpdate = calcNextUpdate({...server, online: data.online});
     const newFailedAttempts = data.online ? 0 : failedAttempts + 1;
@@ -275,6 +275,7 @@ function getTags(data) {
 
 async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 30) {
     const queue = new Set();
+    const promises = [];
     const serverToRetry = [];
     const step = 10;
 
@@ -289,7 +290,7 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
             const {address} = server;
             queue.add(address);
 
-            new Promise(async (resolve, reject) => {
+            promises.push(new Promise(async (resolve, reject) => {
                 const result = await parseServer(address);
                 const data = {
                     address,
@@ -311,10 +312,12 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
                     queue.delete(address);
                     resolve()
                 });
-            })
+            }))
         }
         await sleep(timeout);
     }
+
+    await Promise.all(promises);
 
     if(retries && serverToRetry.length) {
         retries -= 1
@@ -373,7 +376,7 @@ async function parseServersInfo(serversList) {
 }
 
 function calcNextUpdate(server) {
-    const {sortRank, failedAttempts, online} = server;
+    const {sortRank = 999999, failedAttempts = 0, online = false} = server;
     let minutes = 0;
 
     if(!online) {
