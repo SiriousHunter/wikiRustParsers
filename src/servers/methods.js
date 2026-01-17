@@ -59,7 +59,9 @@ async function parseServer(server){
             requestRules: true,
             requestPlayers: true,
             requestRulesRequired: true,
-            requestPlayersRequired: true
+            requestPlayersRequired: true,
+            socketTimeout: 5000,
+            attemptTimeout: 20000,
         })
 
         return data;
