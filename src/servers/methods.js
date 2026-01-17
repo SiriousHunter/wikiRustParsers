@@ -124,7 +124,7 @@ async function getAllServersList(){
                     }
                 },
                 {
-                    $limit: 100
+                    $limit: 1000
                 }
             ])
             .toArray();
