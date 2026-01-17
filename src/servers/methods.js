@@ -81,12 +81,12 @@ async function getAllServersList(){
                         from: 'servers',
                         localField: 'address',
                         foreignField: 'address',
-                        as: 'server'
+                        as: 'serverData'
                     }
                 },
                 {
                     $unwind: {
-                        path: '$server',
+                        path: '$serverData',
                         preserveNullAndEmptyArrays: true
                     }
                 },
@@ -96,8 +96,8 @@ async function getAllServersList(){
                             $cond: {
                                 if: {
                                     $and: [
-                                        {$ne: ['$server', null]},
-                                        {$ne: ['$server.rank', null]}
+                                        {$ne: ['$serverData', null]},
+                                        {$ne: ['$serverData.rank', null]}
                                     ]
                                 },
                                 then: 0,
@@ -105,8 +105,16 @@ async function getAllServersList(){
                             }
                         },
                         sortRank: {
-                            $ifNull: ['$server.rank', 999999]
+                            $ifNull: ['$serverData.rank', 999999]
                         }
+                    }
+                },
+                {
+                    $project: {
+                        address: 1,
+                        sortRank: 1,
+                        failedAttempts: 1,
+                        serverData: 1
                     }
                 },
                 {
@@ -116,12 +124,12 @@ async function getAllServersList(){
                     }
                 },
                 {
-                    $limit: 1000
+                    $limit: 100
                 }
             ])
             .toArray();
 
-        return data.map(({address, sortRank, failedAttempts = 0}) => ({address, sortRank, failedAttempts}));
+        return data.map(({address, sortRank, failedAttempts = 0, serverData}) => ({address, sortRank, failedAttempts, serverData}));
     } catch(err){
         console.error(err.message);
     }
@@ -129,12 +137,10 @@ async function getAllServersList(){
     return;
 }
 
-async function createEvents(connect, server){
+async function createEvents(data, server){
     const events = [];
 
     try {
-        const [data] = await mongoose.connection.db.collection('servers').find({connect}).toArray();
-
         if (!data) {
             events.push(new ServerEvent(EVENTS.START_MONITORING));
             return events;
@@ -214,11 +220,12 @@ async function createEvents(connect, server){
 
 async function updateServerInfo(data, server) {
     const {connect, address} = data;
+    const {serverData} = server;
     const {failedAttempts = 0} = server;
 
     const nextUpdate = calcNextUpdate({...server, online: data.online});
     const newFailedAttempts = data.online ? 0 : failedAttempts + 1;
-    const events = await createEvents(connect, data);
+    const events = await createEvents(serverData, data);
 
     events.length && await mongoose.connection.db.collection('servers_events').insertMany(events.map(event => ({
         ...event,
