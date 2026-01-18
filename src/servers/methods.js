@@ -264,7 +264,7 @@ async function updateServerInfo(data, server) {
         })
     } else {
         failedAttempts > 5 && await mongoose.connection.db.collection('servers')
-            .updateOne({address}, {$set: {online: data.online}}, {upsert: true})
+            .updateOne({address}, {$set: {online: data.online, rank: null}}, {upsert: true})
             .catch(err => console.log(err));
     }
 
