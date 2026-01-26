@@ -34,6 +34,17 @@ const skinsSchema = mongoose.Schema({
         url: {type: String},
         updatedTime: {type: Date}
     }],
+    prices: [{
+        market: {type: String},
+        buyPrice: {type: Number},
+        sellPrice: {type: Number},
+        soldSum: {type: Number},
+        fee: {type: Number},
+        stock: {type: Number},
+        isAvailable: {type: Boolean},
+        url: {type: String},
+        updated: {type: Date}
+    }],
     isAccepted: {type: Boolean},
     timeAccepted: {type: String},
     timeUpdated: {type: String},

@@ -8,6 +8,7 @@ const SteamStore = require('./markets/steamstore');
 const Waxpeer = require('./markets/waxpeer');
 const RustTm = require('./markets/rust-tm');
 const LootFarm = require('./markets/loot-farm');
+const SkinsMonitoring = require('./markets/skins-monitoring');
 
 (async () => {
     await connection;
@@ -20,6 +21,8 @@ const LootFarm = require('./markets/loot-farm');
     await Waxpeer.run()
     await RustTm.run()
     await LootFarm.run()
+    await SkinsMonitoring.run()
+    await SteamStore.run()
 
     process.exit()
 })();
