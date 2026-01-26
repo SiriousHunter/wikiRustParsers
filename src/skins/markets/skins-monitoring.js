@@ -8,7 +8,7 @@ const LOCALES = ['ru', 'en'];
 const {BASE_URL} = process.env;
 
 class SkinsMonitoring extends BaseParser {
-    API_URL = 'http://89.125.63.75:3333/api';
+    API_URL = 'http://parserSkinsMonit:3000/';
 
     constructor() {
         super();
