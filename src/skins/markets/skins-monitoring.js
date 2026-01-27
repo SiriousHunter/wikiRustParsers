@@ -51,7 +51,7 @@ class SkinsMonitoring extends BaseParser {
                 if (!url) continue;
 
 
-                buyPrice && buyPrices.push({
+                buyPrice && Number(stock) !== 0 && buyPrices.push({
                     market: marketName,
                     stock,
                     url,
