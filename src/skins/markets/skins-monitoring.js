@@ -56,7 +56,7 @@ class SkinsMonitoring extends BaseParser {
                     url,
                     buyPrice: buyPrice / 100,
                     ...sellPrice > 0 && {sellPrice: sellPrice / 100},
-                    updated: new Date(Number(timestamp)),
+                    ...timestamp && {updated: new Date(Number(timestamp))},
                 })
             }
 
@@ -130,7 +130,7 @@ class SkinsMonitoring extends BaseParser {
     async #saveBuyPrices(name, buyPrices) {
 
         for (const price of buyPrices) {
-            const {market, buyPrice, sellPrice, stock, url, updated} = price;
+            const {market, buyPrice, sellPrice, stock, url, updated = new Date()} = price;
 
             const updatedSkin = await models.skins.updateOne({name: name, prices: {$exists: true}},{
                 $set: {

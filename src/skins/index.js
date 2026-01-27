@@ -13,7 +13,7 @@ const SkinsMonitoring = require('./markets/skins-monitoring');
 (async () => {
     await connection;
 
-    await SCMM.run()
+    // await SCMM.run()
     // await Avan.run()
     // await LisSkins.run()
     // await Tradeit.run()
