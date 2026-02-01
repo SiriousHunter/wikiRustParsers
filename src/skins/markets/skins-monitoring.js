@@ -83,7 +83,7 @@ class SkinsMonitoring extends BaseParser {
               // return `https://cs.deals/new/market?game=rust&sort=newest&sort_desc=1&name=${fullEscapedNameWithPlus}&exact_match=0`;
               return 'https://csdeals.com/new/?ref=nde3mzr'
             case 'rustSkins':
-              return `https://rustskins.com/ru/rust/item/${escapedItemName}`;
+              return `https://rustskins.com/rust/item/${escapedItemName}?r=rustexplore`;
             // case 'skinport':
             //   return `https://skinport.com/ru/rust/item/${fullEscapedName}`;
             case 'tradeIt':
