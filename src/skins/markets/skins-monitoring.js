@@ -61,7 +61,7 @@ class SkinsMonitoring extends BaseParser {
                 })
             }
 
-            buyPrices.length && await this.#saveBuyPrices(name, buyPrices);
+            await this.#saveBuyPrices(name, buyPrices);
         }
     }
 
@@ -125,46 +125,29 @@ class SkinsMonitoring extends BaseParser {
             }
          }
 
-        await mongoose.connection.db.collection('skinsprices').insertMany(data)
+        data.length && await mongoose.connection.db.collection('skinsprices').insertMany(data)
     }
 
     async #saveBuyPrices(name, buyPrices) {
+        const prices = buyPrices.map(price => ({
+            market: price.market,
+            buyPrice: price.buyPrice,
+            sellPrice: price.sellPrice,
+            fee: 0,
+            stock: price.stock,
+            isAvailable: true,
+            url: price.url,
+            updated: price.updated || new Date(),
+        }))
 
-        for (const price of buyPrices) {
-            const {market, buyPrice, sellPrice, stock, url, updated = new Date()} = price;
+        const buyNowPrice = prices.find(elem => elem.market === 'steam')?.buyPrice ;
 
-            const updatedSkin = await models.skins.updateOne({name: name, prices: {$exists: true}},{
-                $set: {
-                    "prices.$[elem].market": market,
-                    "prices.$[elem].buyPrice": buyPrice,
-                    "prices.$[elem].sellPrice": sellPrice,
-                    "prices.$[elem].fee": 0,
-                    "prices.$[elem].stock": stock,
-                    "prices.$[elem].isAvailable": true,
-                    "prices.$[elem].url": url,
-                    "prices.$[elem].updated": updated,
-                }
-            }, {
-                arrayFilters: [{ "elem.market": {$eq: market} }]
-            })
-
-            if (updatedSkin.modifiedCount === 0) { // Если ничего не изменилось, добавляем новый элемент
-                await models.skins.updateOne(
-                    {name: name}, {
-                        $push: {
-                            prices: {
-                                market,
-                                buyPrice,
-                                sellPrice,
-                                stock,
-                                url,
-                                updated,
-                            }
-                        }
-                    });
+        await models.skins.updateOne({name: name},{
+            $set: {
+                prices,
+                ...buyNowPrice && {buyNowPrice: buyNowPrice},
             }
-        }
-
+        })
     }
 }
 

@@ -1,11 +1,8 @@
 const mongoose = require("mongoose");
 const {connection, models} = require('../models');
 
-(async () => {
-    await connection;
-
-    const now = new Date();
-    const startHour = new Date(now);
+const aggregate = async date => {
+    const startHour = new Date(date);
     startHour.setMinutes(0, 0, 0);
     startHour.setHours(startHour.getHours() - 2);
 
@@ -20,7 +17,10 @@ const {connection, models} = require('../models');
                 }
             },
 
-            // 2. Группировка по market, name и часу
+            // 2. Сортировка по времени для корректного $last
+            { $sort: { timestamp: 1 } },
+
+            // 3. Группировка по market, name и часу
             {
                 $group: {
                     _id: {
@@ -31,17 +31,19 @@ const {connection, models} = require('../models');
                         day: { $dayOfMonth: "$timestamp" },
                         hour: { $hour: "$timestamp" }
                     },
-                    avgPricePerMarket: { $avg: "$price" },
-                    avgStockPerMarket: { $avg: "$stock" }
+                    lastPrice: { $last: "$price" },
+                    lastStock: { $last: "$stock" },
+                    stocks: { $push: "$stock" }
                 }
             },
 
-            // 3. timestamp каждого часа
+            // 4. Форматирование, округление и подсчёт продаж
             {
                 $project: {
+                    _id: 0,
                     market: "$_id.market",
                     name: "$_id.name",
-                    hourTimestamp: {
+                    timestamp: {
                         $dateFromParts: {
                             year: "$_id.year",
                             month: "$_id.month",
@@ -49,45 +51,49 @@ const {connection, models} = require('../models');
                             hour: "$_id.hour"
                         }
                     },
-                    avgPricePerMarket: 1,
-                    avgStockPerMarket: 1
+                    price: { $round: ["$lastPrice", 2] },
+                    stock: { $round: ["$lastStock"] },
+                    sales: {
+                        $reduce: {
+                            input: { $range: [1, { $size: "$stocks" }] },
+                            initialValue: 0,
+                            in: {
+                                $add: [
+                                    "$$value",
+                                    { $max: [
+                                            0,
+                                            { $subtract: [
+                                                    { $arrayElemAt: ["$stocks", { $subtract: ["$$this", 1] }] },
+                                                    { $arrayElemAt: ["$stocks", "$$this"] }
+                                                ]}
+                                        ]}
+                                ]
+                            }
+                        }
+                    }
                 }
             },
 
-            // 4. Финальная агрегация по name + hourTimestamp
-            {
-                $group: {
-                    _id: {
-                        name: "$name",
-                        hourTimestamp: "$hourTimestamp"
-                    },
-                    avgPriceAllMarkets: { $avg: "$avgPricePerMarket" },
-                    sumHourlyStocksAcrossMarkets: { $sum: "$avgStockPerMarket" }
-                }
-            },
-
-            // 5. Финальное форматирование и округление
-            {
-                $project: {
-                    _id: 0,
-                    name: "$_id.name",
-                    timestamp: "$_id.hourTimestamp",
-                    price: { $round: ["$avgPriceAllMarkets", 2] },
-                    stock: { $round: ["$sumHourlyStocksAcrossMarkets"] }
-                }
-            },
-
-            // 6. Сохранение
+            // 4. Сохранение
             {
                 $merge: {
                     into: "skinspricesbyhours",
-                    on: ["name", "timestamp"],
+                    on: ["market", "name", "timestamp"],
                     whenMatched: "replace",
                     whenNotMatched: "insert"
                 }
             }
         ]
     ).toArray()
+}
+
+
+(async () => {
+    await connection;
+
+    const now = new Date("2026-02-09T00:00:26.097Z");
+    await aggregate(now);
+
     process.exit()
 })();
 
