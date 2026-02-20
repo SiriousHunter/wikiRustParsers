@@ -134,7 +134,7 @@ class SkinsMonitoring extends BaseParser {
             buyPrice: price.buyPrice,
             sellPrice: price.sellPrice,
             fee: 0,
-            stock: price.stock,
+            stock: Number(price.stock) || 0,
             isAvailable: true,
             url: price.url,
             updated: price.updated || new Date(),
