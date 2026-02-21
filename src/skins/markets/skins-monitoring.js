@@ -145,7 +145,7 @@ class SkinsMonitoring extends BaseParser {
         await models.skins.updateOne({name: name},{
             $set: {
                 prices,
-                ...buyNowPrice && {buyNowPrice: buyNowPrice},
+                ...buyNowPrice && {buyNowPrice: buyNowPrice * 100},
             }
         })
     }
