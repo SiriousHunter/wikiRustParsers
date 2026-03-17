@@ -9,7 +9,7 @@ const {BASE_URL} = process.env;
 const getDescription = (skin, locale) => {
     const name = skin.name;
     const collection = skin.itemCollection;
-    const minPrice = skin.buyNowPrice ? (skin.buyNowPrice / 100).toFixed(2) : null;
+    const minPrice = skin.buyNowPrice ? skin.buyNowPrice.toFixed(2) : null;
 
     const templates = {
         ru: {
