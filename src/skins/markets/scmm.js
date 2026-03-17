@@ -78,6 +78,10 @@ class SCMM extends BaseParser {
                 let createSitemap = true;
                 skin.url = skin.name.toLowerCase().trim().replaceAll(' ', '-');
 
+                if(skin?.buyNowPrice) {
+                    skin.buyNowPrice = (skin.buyNowPrice / 100) || null;
+                }
+
                 await models.skins.create(skin)
                     .catch(async err => {
                         if (err.code === 11000) {
