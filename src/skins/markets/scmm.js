@@ -41,7 +41,7 @@ const getDescription = (skin, locale) => {
 
 const getTitle = (skin, locale) => {
     const name = skin.name;
-    const minPrice = skin.buyNowPrice ? (skin.buyNowPrice / 100).toFixed(2) : null;
+    const minPrice = skin.buyNowPrice ? skin.buyNowPrice.toFixed(2) : null;
 
     const templates = {
         ru: {
