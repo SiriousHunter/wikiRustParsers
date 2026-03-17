@@ -390,7 +390,7 @@ function calcNextUpdate(server) {
 
     if(!online) {
         const delay = 1.8 * Math.pow(2, failedAttempts);
-        minutes = Math.min(1440, delay);
+        minutes = Math.min(4320, delay);
     }else {
         minutes = intervalMinutesByRank(sortRank);
     }
