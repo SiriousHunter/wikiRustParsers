@@ -91,7 +91,7 @@ const aggregate = async date => {
 (async () => {
     await connection;
 
-    const now = new Date("2026-02-09T00:00:26.097Z");
+    const now = new Date();
     await aggregate(now);
 
     process.exit()
