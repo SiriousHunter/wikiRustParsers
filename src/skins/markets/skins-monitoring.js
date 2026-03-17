@@ -46,12 +46,15 @@ class SkinsMonitoring extends BaseParser {
                     lSP: sellPrice,
                     lTs: timestamp,
                 } = market;
+
                 const url = this.getUrl(marketName, name);
+                const isValid = this.#isValidPrice(market);
 
-                if (!url) continue;
-
-
-                buyPrice && Number(stock) !== 0 && buyPrices.push({
+                isValid
+                && url
+                && buyPrice
+                && Number(stock) !== 0
+                && buyPrices.push({
                     market: marketName,
                     stock,
                     url,
@@ -113,7 +116,7 @@ class SkinsMonitoring extends BaseParser {
                     lSt: stock,
                 } = market;
 
-                if ((Date.now() - new Date(Number(timestamp))) / 60000 <= 10) {
+                if (this.#isValidPrice(market)) {
                     data.push({
                         name,
                         market: marketName,
@@ -145,9 +148,24 @@ class SkinsMonitoring extends BaseParser {
         await models.skins.updateOne({name: name},{
             $set: {
                 prices,
-                ...buyNowPrice && {buyNowPrice: buyNowPrice * 100},
+                ...buyNowPrice && {buyNowPrice: buyNowPrice},
             }
         })
+    }
+
+    async #isValidPrice(price) {
+        const {
+            lTs: timestamp,
+            _ISP: suspected,
+        } = price;
+
+        if (suspected) {
+            return false;
+        }else if ((Date.now() - new Date(Number(timestamp))) / 60000 <= 10) {
+            return false;
+        }
+
+        return true
     }
 }
 
