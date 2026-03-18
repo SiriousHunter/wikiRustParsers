@@ -403,10 +403,10 @@ function calcNextUpdate(server) {
 }
 
 function intervalMinutesByRank(rank) {
-    const MIN_MINUTES = 2;
-    const MAX_MINUTES = 60;
+    const MIN_MINUTES = 1;
+    const MAX_MINUTES = 120;
     const RANK_START = 30;
-    const RANK_MAX = 600;
+    const RANK_MAX = 1200;
 
     if (rank <= RANK_START) return MIN_MINUTES;
 
