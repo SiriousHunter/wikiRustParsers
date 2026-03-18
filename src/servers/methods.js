@@ -61,7 +61,7 @@ async function parseServer(server){
             requestRulesRequired: true,
             // requestPlayersRequired: true,
             socketTimeout: 5000,
-            attemptTimeout: 20000,
+            attemptTimeout: 10000,
         })
 
         return data;
@@ -268,9 +268,13 @@ async function updateServerInfo(data, server) {
             .catch(err => console.log(err));
     }
 
-    await mongoose.connection.db.collection('servers_lists')
+
+    failedAttempts <= 15 && await mongoose.connection.db.collection('servers_lists')
         .updateOne({address}, {$set: {nextUpdate, failedAttempts: newFailedAttempts}}, {upsert: true})
         .catch(err => console.log(err));
+
+    failedAttempts > 15 && await mongoose.connection.db.collection('servers')
+        .deleteOne({address});
 }
 
 function getTags(data) {
@@ -399,7 +403,7 @@ function calcNextUpdate(server) {
 }
 
 function intervalMinutesByRank(rank) {
-    const MIN_MINUTES = 1;
+    const MIN_MINUTES = 2;
     const MAX_MINUTES = 60;
     const RANK_START = 30;
     const RANK_MAX = 1000;
