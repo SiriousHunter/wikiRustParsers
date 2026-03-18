@@ -229,7 +229,7 @@ async function updateServerInfo(data, server) {
     const newFailedAttempts = data.online ? 0 : failedAttempts + 1;
     const events = await createEvents(serverData, data);
 
-    events.length && await mongoose.connection.db.collection('servers_events').insertMany(events.map(event => ({
+    events.length && mongoose.connection.db.collection('servers_events').insertMany(events.map(event => ({
         ...event,
         address: connect
     })))
@@ -244,6 +244,12 @@ async function updateServerInfo(data, server) {
 
         const updated = new Date();
 
+        mongoose.connection.db.collection('servers_players').insertOne({
+            address: connect,
+            playersCount: data.numplayers,
+            timestamp: new Date(),
+        })
+
         await mongoose.connection.db.collection('servers')
             .updateOne({connect}, {$set: {
                 ...data,
@@ -256,12 +262,6 @@ async function updateServerInfo(data, server) {
                 wipesSchedule,
             }}, {upsert: true})
             .catch(err => console.log(err));
-
-        await mongoose.connection.db.collection('servers_players').insertOne({
-            address: connect,
-            playersCount: data.numplayers,
-            timestamp: new Date(),
-        })
     } else {
         failedAttempts > 5 && await mongoose.connection.db.collection('servers')
             .updateOne({address}, {$set: {online: data.online, rank: null}}, {upsert: true})
@@ -406,7 +406,7 @@ function intervalMinutesByRank(rank) {
     const MIN_MINUTES = 2;
     const MAX_MINUTES = 60;
     const RANK_START = 30;
-    const RANK_MAX = 1000;
+    const RANK_MAX = 600;
 
     if (rank <= RANK_START) return MIN_MINUTES;
 
