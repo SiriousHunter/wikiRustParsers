@@ -264,16 +264,16 @@ async function updateServerInfo(data, server) {
             .catch(err => console.log(err));
     } else {
         failedAttempts > 5 && await mongoose.connection.db.collection('servers')
-            .updateOne({address}, {$set: {online: data.online, rank: null}}, {upsert: true})
+            .updateOne({address}, {$set: {online: data.online, rank: null}})
             .catch(err => console.log(err));
     }
 
 
     failedAttempts <= 15 && await mongoose.connection.db.collection('servers_lists')
-        .updateOne({address}, {$set: {nextUpdate, failedAttempts: newFailedAttempts}}, {upsert: true})
+        .updateOne({address}, {$set: {nextUpdate, failedAttempts: newFailedAttempts}})
         .catch(err => console.log(err));
 
-    failedAttempts > 15 && await mongoose.connection.db.collection('servers')
+    failedAttempts > 15 && await mongoose.connection.db.collection('servers_lists')
         .deleteOne({address});
 }
 
