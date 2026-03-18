@@ -7,6 +7,12 @@ const mongoose = require("mongoose");
 const LOCALES = ['ru', 'en'];
 const {BASE_URL} = process.env;
 
+const suspectedStores = [
+    'rustTM',
+    'avan',
+    'tradeIt'
+]
+
 class SkinsMonitoring extends BaseParser {
     API_URL = 'http://89.125.63.75:3333/api';
 
@@ -157,11 +163,15 @@ class SkinsMonitoring extends BaseParser {
         const {
             lTs: timestamp,
             _ISP: suspected,
+            mN: marketName,
+            lSt: stock,
         } = price;
 
         if (suspected) {
             return false;
         }else if ((Date.now() - new Date(Number(timestamp))) / 60000 <= 10) {
+            return false;
+        }else if (suspectedStores.includes(marketName) && stock < 2) {
             return false;
         }
 
