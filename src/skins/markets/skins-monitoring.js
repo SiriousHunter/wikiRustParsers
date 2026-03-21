@@ -159,7 +159,7 @@ class SkinsMonitoring extends BaseParser {
         })
     }
 
-    async #isValidPrice(price) {
+    #isValidPrice(price) {
         const {
             lTs: timestamp,
             _ISP: suspected,
@@ -169,9 +169,9 @@ class SkinsMonitoring extends BaseParser {
 
         if (suspected) {
             return false;
-        }else if ((Date.now() - new Date(Number(timestamp))) / 60000 <= 10) {
+        } else if ((Date.now() - new Date(Number(timestamp))) / 60000 <= 10) {
             return false;
-        }else if (suspectedStores.includes(marketName) && stock < 2) {
+        } else if (suspectedStores.includes(marketName) && stock < 2) {
             return false;
         }
 
