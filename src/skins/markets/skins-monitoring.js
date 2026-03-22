@@ -167,9 +167,7 @@ class SkinsMonitoring extends BaseParser {
             lSt: stock,
         } = price;
 
-        if (suspected) {
-            return false;
-        } else if ((Date.now() - new Date(Number(timestamp))) / 60000 <= 10) {
+        if ((Date.now() - new Date(Number(timestamp))) / 60000 >= 30) {
             return false;
         } else if (suspectedStores.includes(marketName) && stock < 2) {
             return false;
