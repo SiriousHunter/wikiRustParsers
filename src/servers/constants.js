@@ -39,7 +39,8 @@ const TAGS = {
     PREMIUM: 'premium',
     MODDED: 'modded',
     OXIDE: 'oxide',
-    CARBON: 'carbon'
+    CARBON: 'carbon',
+    COPTER: 'copter',
 }
 
 const GAMEMODE_DEFAULT = TAGS.VANILLA;
@@ -48,12 +49,19 @@ const WIPES_SCHEDULE_DEFAULT = TAGS.MONTHLY;
 const GAMEMODES = [TAGS.VANILLA, TAGS.HARDCORE, TAGS.SOFTCORE];
 const WIPES_SCHEDULES = [TAGS.MONTHLY, TAGS.BIWEEKLY, TAGS.WEEKLY];
 
+const PARTY_SIZES = {
+  1: ['solo'],
+  2: ['duo'],
+  3: ['trio'],
+  4: ['quad'],
+}
 
 module.exports = {
-TAG_KEY_ADAPTER,
+  TAG_KEY_ADAPTER,
   GAMEMODE_DEFAULT,
   GAMEMODES,
   WIPES_SCHEDULES,
   WIPES_SCHEDULE_DEFAULT,
-  TAGS
+  TAGS,
+  PARTY_SIZES,
 };

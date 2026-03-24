@@ -3,7 +3,7 @@ const {GameDig} = require("gamedig");
 const {sleep, ServerEvent, EVENTS, areStringArraysEqual, concatDesc, addMinutesToDate} = require("../utils");
 const mongoose = require("mongoose");
 const axios = require("axios");
-const { TAG_KEY_ADAPTER } = require('./constants');
+const { TAG_KEY_ADAPTER, TAGS } = require('./constants');
 const {
     getGamemode,
     getWipesSchedule,
@@ -220,6 +220,58 @@ async function createEvents(data, server){
     return events;
 }
 
+function getPartySize(data) {
+    const {name = ''} = data;
+    const normalized = name
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    const maxMatch = normalized.match(/(?<![A-Z])MAX\s*[-.]?\s*(\d{1,2})(?!\d)/);
+    if (maxMatch) {
+        return Number(maxMatch[1]);
+    }
+
+    const nMaxMatch = normalized.match(/(?<!\d)(\d{1,2})\s*MAX(?![A-Z])/);
+    if (nMaxMatch) {
+        return Number(nMaxMatch[1]);
+    }
+
+    const groupWords = normalized.match(/\b(SOLO|DUO|TRIO|QUAD)\b/g);
+    if (groupWords) {
+        const sizeMap = {SOLO: 1, DUO: 2, TRIO: 3, QUAD: 4};
+        return Math.max(...groupWords.map(w => sizeMap[w]));
+    }
+
+    return 0;
+}
+
+function getLootRate(data) {
+    const {name = ''} = data;
+    const upper = name.toUpperCase().replace(/[\u0425\u0445]/g, 'X');
+
+    const rates = [];
+    const ratePattern = /(?<![A-Z0-9#.])X\s*(\d{1,4})(?:\s*[/\-]\s*X?\s*(\d{1,4}))?(?:\+?)(?![A-Z0-9])|(?<![A-Z0-9#.])(\d{1,4})\s*X(?:\s*[/\-]\s*(\d{1,4})\s*X?)?(?:\+?)(?![A-Z0-9])/gi;
+
+    let match;
+    while ((match = ratePattern.exec(upper)) !== null) {
+        const nums = [match[1], match[2], match[3], match[4]]
+            .filter(Boolean)
+            .map(Number);
+        rates.push(Math.max(...nums));
+    }
+
+    if (!rates.length) {
+        const lootPattern = /LOOT\s*X\s*(\d{1,4})(?:\s*[-]\s*X?\s*(\d{1,4}))?/gi;
+        while ((match = lootPattern.exec(upper)) !== null) {
+            const nums = [match[1], match[2]].filter(Boolean).map(Number);
+            rates.push(Math.max(...nums));
+        }
+    }
+
+    return rates.length ? Math.max(...rates) : 1;
+}
+
 async function updateServerInfo(data, server) {
     const {connect, address} = data;
     const {serverData} = server;
@@ -241,6 +293,8 @@ async function updateServerInfo(data, server) {
         const queuePlayers = getPlayersQueue(data);
         const gamemode = getGamemode(data);
         const wipesSchedule = getWipesSchedule(data);
+        const maxPartySize = getPartySize(data);
+        const lootRate = getLootRate(data);
 
         const updated = new Date();
 
@@ -260,6 +314,8 @@ async function updateServerInfo(data, server) {
                 queuePlayers,
                 gamemode,
                 wipesSchedule,
+                maxPartySize,
+                lootRate,
             }}, {upsert: true})
             .catch(err => console.log(err));
     } else {
@@ -278,12 +334,16 @@ async function updateServerInfo(data, server) {
 }
 
 function getTags(data) {
-    const {raw = {}} = data;
+    const {raw = {}, name = ''} = data;
     const {tags = []} = raw;
 
     const convertedTags = tags.map(tag => TAG_KEY_ADAPTER[tag]).filter(Boolean).map(tag => tag.toUpperCase());
 
-    return convertedTags;
+    if (/copter/i.test(name)) {
+        convertedTags.push(TAGS.COPTER.toUpperCase());
+    }
+
+    return [...new Set(convertedTags)];
 }
 
 async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 30) {
