@@ -286,7 +286,7 @@ async function updateServerInfo(data, server) {
         address: connect
     })))
 
-    if (data.online) {
+    if (data.online && data?.numplayers <= data?.maxplayers && data?.numplayers < 10000) {
         const tags = getTags(data);
         const description = getDescription(data);
         const uptime = getUptime(data);
