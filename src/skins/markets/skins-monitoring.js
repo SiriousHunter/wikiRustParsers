@@ -169,7 +169,7 @@ class SkinsMonitoring extends BaseParser {
 
         if ((Date.now() - new Date(Number(timestamp))) / 60000 >= 30) {
             return false;
-        } else if (suspectedStores.includes(marketName) && stock < 2) {
+        } else if (stock < 2) {
             return false;
         }
 
