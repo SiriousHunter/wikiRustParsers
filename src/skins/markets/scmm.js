@@ -111,6 +111,7 @@ class SCMM extends BaseParser {
                         path,
                         title: title,
                         description: des,
+                        slugName: skin.name,
                         lang,
                         meta: [
                             {type: 'property', property: 'og:title', content: title},
