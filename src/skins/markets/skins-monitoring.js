@@ -149,12 +149,13 @@ class SkinsMonitoring extends BaseParser {
             updated: price.updated || new Date(),
         }))
 
-        const buyNowPrice = prices.find(elem => elem.market === 'steam')?.buyPrice ;
+        const buyNowPrice = prices.find(elem => elem.market === 'steam')?.buyPrice;
 
         await models.skins.updateOne({name: name},{
             $set: {
                 prices,
                 ...buyNowPrice && {buyNowPrice: buyNowPrice},
+                timeRefreshed: new Date(),
             }
         })
     }
