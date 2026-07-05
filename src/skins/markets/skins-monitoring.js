@@ -155,7 +155,7 @@ class SkinsMonitoring extends BaseParser {
             $set: {
                 prices,
                 ...buyNowPrice && {buyNowPrice: buyNowPrice},
-                timeRefreshed: new Date(),
+                timeRefreshed: new Date().toISOString(),
             }
         })
     }
