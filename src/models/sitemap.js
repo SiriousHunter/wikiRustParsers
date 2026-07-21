@@ -9,6 +9,7 @@ const sitemapSchema = mongoose.Schema({
     keywords: { type: String },
     enabled: { type: Boolean, default: true},
     search: { type: Boolean, default: true},
+    slugName: { type: String },
     meta: [{
         property: { type: String },
         content: { type: String },
