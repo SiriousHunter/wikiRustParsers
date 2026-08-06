@@ -1,11 +1,7 @@
 const mongoose = require("mongoose");
-const {connection, models} = require('../models');
+const {connection, models} = require('./models');
 
-const aggregate = async date => {
-    const startHour = new Date(date);
-    startHour.setMinutes(0, 0, 0);
-    startHour.setHours(startHour.getHours() - 2);
-
+const aggregateSkinsByHour = async startHour => {
     await mongoose.connection.db.collection('skinsprices').aggregate(
         [
             // 1. Фильтр по полным часам: >= startHour && < endHour
@@ -87,14 +83,83 @@ const aggregate = async date => {
     ).toArray()
 }
 
+const aggregateServersPlayersByHour = async startHour => {
+    await mongoose.connection.db.collection('servers_players').aggregate(
+        [
+            // 1. Фильтр по полным часам: >= startHour
+            {
+                $match: {
+                    timestamp: {
+                        $gte: startHour,
+                    }
+                }
+            },
+
+            // 2. Группировка по address и часу
+            {
+                $group: {
+                    _id: {
+                        address: "$address",
+                        year: { $year: "$timestamp" },
+                        month: { $month: "$timestamp" },
+                        day: { $dayOfMonth: "$timestamp" },
+                        hour: { $hour: "$timestamp" }
+                    },
+                    maxPlayers: { $max: "$playersCount" },
+                    minPlayers: { $min: "$playersCount" },
+                    avgPlayers: { $avg: "$playersCount" },
+                    avgQueue: { $avg: "$playersQueue" }
+                }
+            },
+
+            // 3. Форматирование и округление
+            {
+                $project: {
+                    _id: 0,
+                    address: "$_id.address",
+                    timestamp: {
+                        $dateFromParts: {
+                            year: "$_id.year",
+                            month: "$_id.month",
+                            day: "$_id.day",
+                            hour: "$_id.hour"
+                        }
+                    },
+                    maxPlayers: { $round: ["$maxPlayers"] },
+                    minPlayers: { $round: ["$minPlayers"] },
+                    avgPlayers: { $round: ["$avgPlayers", 2] },
+                    avgQueue: { $round: [{ $ifNull: ["$avgQueue", 0] }, 2] }
+                }
+            },
+
+            // 4. Сохранение
+            {
+                $merge: {
+                    into: "servers_players_by_hours",
+                    on: ["address", "timestamp"],
+                    whenMatched: "replace",
+                    whenNotMatched: "insert"
+                }
+            }
+        ]
+    ).toArray()
+}
+
+const aggregate = async date => {
+    const startHour = new Date(date);
+    startHour.setMinutes(0, 0, 0);
+    startHour.setHours(startHour.getHours() - 2);
+
+    // await aggregateSkinsByHour(startHour);
+    await aggregateServersPlayersByHour(startHour);
+}
+
 
 (async () => {
     await connection;
 
-    const now = new Date();
+    const now = new Date('2026-07-06T06:23:57.791Z');
     await aggregate(now);
 
     process.exit()
 })();
-
-

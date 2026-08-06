@@ -151,12 +151,13 @@ async function createEvents(data, server){
         const {
             online,
             password,
-            map,
             name,
-            version,
             maxplayers,
             raw,
+            uptime,
         } = data;
+
+        const currentUptime = getUptime(server);
 
         if(online !== server.online) {
             events.push(new ServerEvent(EVENTS.ONLINE_STATUS_CHANGED, server.online));
@@ -174,13 +175,13 @@ async function createEvents(data, server){
             events.push(new ServerEvent(EVENTS.PASSWORD_CHANGED, server.password));
         }
 
-        if(map !== server.map) {
-            events.push(new ServerEvent(EVENTS.MAP_CHANGED, server.map));
-        }
+        // if(map !== server.map) {
+        //     events.push(new ServerEvent(EVENTS.MAP_CHANGED, server.map));
+        // }
 
-        if(version !== server.version) {
-            events.push(new ServerEvent(EVENTS.VERSION_CHANGED, server.version));
-        }
+        // if(version !== server.version) {
+        //     events.push(new ServerEvent(EVENTS.VERSION_CHANGED, server.version));
+        // }
 
         if(maxplayers !== server.maxplayers) {
             events.push(new ServerEvent(EVENTS.VERSION_CHANGED, server.maxplayers));
@@ -190,9 +191,9 @@ async function createEvents(data, server){
             events.push(new ServerEvent(EVENTS.ENVIRONMENT_CHANGED, server?.raw?.environment));
         }
 
-        if(raw?.steamid !== server?.raw?.steamid) {
-            events.push(new ServerEvent(EVENTS.STEAM_ID_CHANGED, server?.raw?.steamid));
-        }
+        // if(raw?.steamid !== server?.raw?.steamid) {
+        //     events.push(new ServerEvent(EVENTS.STEAM_ID_CHANGED, server?.raw?.steamid));
+        // }
 
         // if(!areStringArraysEqual(raw?.tags, server?.raw?.tags)) {
         //     events.push(new ServerEvent(EVENTS.TAGS_CHANGED, server?.raw?.tags));
@@ -206,13 +207,18 @@ async function createEvents(data, server){
             events.push(new ServerEvent(EVENTS.MAP_SIZE_CHANGED, server?.raw?.rules?.['world.size']));
         }
 
-        if(raw?.rules?.build !== server?.raw?.rules?.build) {
-            events.push(new ServerEvent(EVENTS.BUILD_CHANGED, server?.raw?.rules?.build));
-        }
+        // if(raw?.rules?.build !== server?.raw?.rules?.build) {
+        //     events.push(new ServerEvent(EVENTS.BUILD_CHANGED, server?.raw?.rules?.build));
+        // }
 
         if(concatDesc(raw?.rules) !== concatDesc(server?.raw?.rules)) {
             events.push(new ServerEvent(EVENTS.DESCRIPTION_CHANGED, concatDesc(server?.raw?.rules)));
         }
+
+        if(new Date(uptime).getTime() < new Date(currentUptime).getTime()) {
+            events.push(new ServerEvent(EVENTS.WIPE, currentUptime));
+        }
+
     } catch(err){
         console.error(err.message);
     }
@@ -301,6 +307,7 @@ async function updateServerInfo(data, server) {
         mongoose.connection.db.collection('servers_players').insertOne({
             address: connect,
             playersCount: data.numplayers,
+            playersQueue: queuePlayers,
             timestamp: new Date(),
         })
 
@@ -346,7 +353,7 @@ function getTags(data) {
     return [...new Set(convertedTags)];
 }
 
-async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 30) {
+async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 50) {
     const queue = new Set();
     const promises = [];
     const serverToRetry = [];

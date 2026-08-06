@@ -14,6 +14,7 @@ const EVENTS = {
     TAGS_CHANGED: "tags_changed",
     ONLINE_STATUS_CHANGED: "online_status_changed",
     DESCRIPTION_CHANGED: "description_changed",
+    WIPE: "wipe",
 };
 
 class ServerEvent {
