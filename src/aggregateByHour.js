@@ -150,7 +150,7 @@ const aggregate = async date => {
     startHour.setMinutes(0, 0, 0);
     startHour.setHours(startHour.getHours() - 2);
 
-    // await aggregateSkinsByHour(startHour);
+    await aggregateSkinsByHour(startHour);
     await aggregateServersPlayersByHour(startHour);
 }
 

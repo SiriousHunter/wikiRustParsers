@@ -185,15 +185,15 @@ const aggregate = async date => {
     startDay.setHours(0, 0, 0, 0);
     startDay.setDate(startDay.getDate() - 2);
 
-    // await aggregateSkinsByDay(startDay).catch(console.error);
+    await aggregateSkinsByDay(startDay).catch(console.error);
     await aggregateServersPlayersByDay(startDay).catch(console.error);
-    // await updateServersAvgPlayers(date).catch(console.error);
+    await updateServersAvgPlayers(date).catch(console.error);
 }
 
 (async () => {
     await connection;
 
-    const now = new Date('2026-07-06T06:23:57.791Z');
+    const now = new Date();
     await aggregate(now);
 
     process.exit()
