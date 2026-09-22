@@ -278,9 +278,7 @@ function getLootRate(data) {
     return rates.length ? Math.max(...rates) : 1;
 }
 
-function getServerType(data, server) {
-    const {raw = {}} = data;
-    const {tags = []} = raw;
+function getServerType(data, server, tags = []) {
     const {type} = server?.serverData || {};
 
     if (type === SERVER_TYPES.OFFICIAL) {
@@ -321,7 +319,7 @@ async function updateServerInfo(data, server) {
         const wipesSchedule = getWipesSchedule(data);
         const maxPartySize = getPartySize(data);
         const lootRate = getLootRate(data);
-        const type = getServerType(data, server);
+        const type = getServerType(data, server, tags);
 
         const updated = new Date();
 
@@ -366,7 +364,8 @@ function getTags(data) {
     const {raw = {}, name = ''} = data;
     const {tags = []} = raw;
 
-    const convertedTags = tags.map(tag => TAG_KEY_ADAPTER[tag]).filter(Boolean).map(tag => tag.toUpperCase());
+    const parseTags = tags.map(tag => tag.split('^')).flat().filter(Boolean);
+    const convertedTags = parseTags.map(tag => TAG_KEY_ADAPTER[tag]).filter(Boolean).map(tag => tag.toUpperCase());
 
     if (/copter/i.test(name)) {
         convertedTags.push(TAGS.COPTER.toUpperCase());
