@@ -364,7 +364,7 @@ function getTags(data) {
     const {raw = {}, name = ''} = data;
     const {tags = []} = raw;
 
-    const parseTags = tags.map(tag => tag.split('^')).flat().filter(Boolean);
+    const parseTags = tags.map(tag => tag.split('^')).flat().filter(Boolean).map(tag => `^${tag}`);
     const convertedTags = parseTags.map(tag => TAG_KEY_ADAPTER[tag]).filter(Boolean).map(tag => tag.toUpperCase());
 
     if (/copter/i.test(name)) {
