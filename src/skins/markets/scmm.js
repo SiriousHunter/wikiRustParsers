@@ -59,7 +59,7 @@ const getTitle = (skin, locale) => {
 }
 
 class SCMM extends BaseParser {
-    API_URL = 'https://rust.scmm.app/api';
+    API_URL = 'https://api.scmm.app/api';
 
     constructor() {
         super();

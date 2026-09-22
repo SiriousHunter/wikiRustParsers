@@ -14,22 +14,28 @@ const getCurrentStoreItems = async axios => {
     return currentStore.items.map(item => item.name);
 }
 
-const getItems = async (axios,  items = [], offset = 0) => {
+const getItems = async (axios,  items = [], offset = 1) => {
     const count = 500;
     const {data, status} = await axios.get('/item', { params: {
-            start: offset,
+            page: offset,
             detailed: true,
-            count,
+            pageSize: count,
     }});
+
+    console.log(`PARSED SKINS: [page: ${offset}| count: ${data?.items?.length}`)
+
+    if(!data?.items?.length) {
+        return items;
+    }
 
     if (status !== 200) {
         console.error(`Get items error. Status: ${status}`);
         return getItems(axios, items, offset)
     }
 
-    if(items.length < data.total && offset < data.total && offset < 10000) {
-        console.log(`PARSED SKINS: ${offset + count}`)
-        return getItems(axios, items.concat(data.items), offset + count)
+    if(data?.items?.length && offset < 10000) {
+
+        return getItems(axios, items.concat(data.items), offset + 1)
     }else {
         items = items.concat(data.items)
     }
