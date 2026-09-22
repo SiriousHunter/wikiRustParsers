@@ -281,7 +281,7 @@ function getLootRate(data) {
 function getServerType(data, server) {
     const {raw = {}} = data;
     const {tags = []} = raw;
-    const {type = SERVER_TYPES.COMMUNITY} = server;
+    const {type} = server?.serverData || {};
 
     if (type === SERVER_TYPES.OFFICIAL) {
         return SERVER_TYPES.OFFICIAL;
