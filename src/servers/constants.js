@@ -43,6 +43,12 @@ const TAGS = {
     COPTER: 'copter',
 }
 
+const SERVER_TYPES = {
+  COMMUNITY: 'community',
+  MODDED: 'modded',
+  OFFICIAL: 'official',
+}
+
 const GAMEMODE_DEFAULT = TAGS.VANILLA;
 const WIPES_SCHEDULE_DEFAULT = TAGS.MONTHLY;
 
@@ -64,4 +70,5 @@ module.exports = {
   WIPES_SCHEDULE_DEFAULT,
   TAGS,
   PARTY_SIZES,
+  SERVER_TYPES,
 };

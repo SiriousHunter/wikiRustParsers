@@ -3,7 +3,7 @@ const {GameDig} = require("gamedig");
 const {sleep, ServerEvent, EVENTS, areStringArraysEqual, concatDesc, addMinutesToDate} = require("../utils");
 const mongoose = require("mongoose");
 const axios = require("axios");
-const { TAG_KEY_ADAPTER, TAGS } = require('./constants');
+const { TAG_KEY_ADAPTER, TAGS, SERVER_TYPES } = require('./constants');
 const {
     getGamemode,
     getWipesSchedule,
@@ -278,6 +278,26 @@ function getLootRate(data) {
     return rates.length ? Math.max(...rates) : 1;
 }
 
+function getServerType(data, server) {
+    const {raw = {}} = data;
+    const {tags = []} = raw;
+    const {type = SERVER_TYPES.COMMUNITY} = server;
+
+    if (type === SERVER_TYPES.OFFICIAL) {
+        return SERVER_TYPES.OFFICIAL;
+    }
+
+    if (tags.includes(TAGS.MODDED.toUpperCase())) {
+        return SERVER_TYPES.MODDED;
+    }
+
+    return SERVER_TYPES.COMMUNITY;
+}
+
+/**
+ * @param {Object} data - current server data from steam query
+ * @param {Object} server - server data from database
+ */
 async function updateServerInfo(data, server) {
     const {connect, address} = data;
     const {serverData} = server;
@@ -301,6 +321,7 @@ async function updateServerInfo(data, server) {
         const wipesSchedule = getWipesSchedule(data);
         const maxPartySize = getPartySize(data);
         const lootRate = getLootRate(data);
+        const type = getServerType(data, server);
 
         const updated = new Date();
 
@@ -323,6 +344,7 @@ async function updateServerInfo(data, server) {
                 wipesSchedule,
                 maxPartySize,
                 lootRate,
+                type,
             }}, {upsert: true})
             .catch(err => console.log(err));
     } else {
@@ -462,7 +484,7 @@ function calcNextUpdate(server) {
     if(!online) {
         const delay = 1.8 * Math.pow(2, failedAttempts);
         minutes = Math.min(4320, delay);
-    }else {
+    } else {
         minutes = intervalMinutesByRank(sortRank);
     }
 
