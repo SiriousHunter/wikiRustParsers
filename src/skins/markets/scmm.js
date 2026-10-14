@@ -82,6 +82,10 @@ class SCMM extends BaseParser {
                     skin.buyNowPrice = (skin.buyNowPrice / 100) || null;
                 }
 
+                if (skin.itemShortName === 'lr300.item') {
+                    skin.itemShortName = 'rifle.lr300';
+                }
+
                 await models.skins.create(skin)
                     .catch(async err => {
                         if (err.code === 11000) {

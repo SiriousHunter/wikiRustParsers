@@ -296,7 +296,7 @@ function getServerType(data, server, tags = []) {
  * @param {Object} data - current server data from steam query
  * @param {Object} server - server data from database
  */
-async function updateServerInfo(data, server) {
+async function updateServerInfo(data, server, claimTokens = []) {
     const {connect, address} = data;
     const {serverData} = server;
     const {failedAttempts = 0} = server;
@@ -322,6 +322,7 @@ async function updateServerInfo(data, server) {
         const type = getServerType(data, server, tags);
 
         const updated = new Date();
+        const owner = findOwner(description, claimTokens);
 
         mongoose.connection.db.collection('servers_players').insertOne({
             address: connect,
@@ -343,6 +344,7 @@ async function updateServerInfo(data, server) {
                 maxPartySize,
                 lootRate,
                 type,
+                ...(owner ? {owner} : {}),
             }}, {upsert: true})
             .catch(err => console.log(err));
     } else {
@@ -360,6 +362,36 @@ async function updateServerInfo(data, server) {
         .deleteOne({address});
 }
 
+async function getClaimTokens() {
+    try {
+        const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        return await mongoose.connection.db
+            .collection('server_claim_tokens')
+            .find({createdAt: {$gte: since}}, {projection: {userId: 1, token: 1, createdAt: 1}})
+            .sort({createdAt: 1})
+            .toArray();
+    } catch (err) {
+        console.error(err.message);
+    }
+
+    return [];
+}
+
+function findOwner(description, claimTokens = []) {
+    const text = description?.text;
+
+    if (!text || !claimTokens.length) {
+        return;
+    }
+
+    // сортировка по возрастанию createdAt, поэтому берём самый свежий токен
+    const lowerText = text.toLowerCase();
+    const claim = [...claimTokens].reverse().find(({token}) => token && lowerText.includes(token.toLowerCase()));
+
+    return claim?.userId;
+}
+
 function getTags(data) {
     const {raw = {}, name = ''} = data;
     const {tags = []} = raw;
@@ -374,7 +406,7 @@ function getTags(data) {
     return [...new Set(convertedTags)];
 }
 
-async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 50) {
+async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSize = 50, claimTokens = []) {
     const queue = new Set();
     const promises = [];
     const serverToRetry = [];
@@ -405,7 +437,7 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
                     return;
                 }
 
-                await updateServerInfo(data, server)
+                await updateServerInfo(data, server, claimTokens)
                 .catch(err => {
                     console.error(`Error updating server ${address}:`, err.message);
                 })
@@ -426,7 +458,7 @@ async function updateServersInfo(serversList, retries = 0, timeout = 50, queueSi
         queueSize = Math.ceil(queueSize / step)
 
         await sleep(1000 * 60)
-        await updateServersInfo(serverToRetry, retries, timeout, queueSize);
+        await updateServersInfo(serverToRetry, retries, timeout, queueSize, claimTokens);
     }
 }
 
@@ -509,6 +541,7 @@ function intervalMinutesByRank(rank) {
   }
 module.exports = {
     getAllServersList,
+    getClaimTokens,
     parseServersList,
     parseServer,
     createEvents,
