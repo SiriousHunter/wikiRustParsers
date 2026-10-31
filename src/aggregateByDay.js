@@ -156,7 +156,29 @@ const updateServersAvgPlayers = async date => {
                         $cond: [{ $gte: ["$timestamp", start7d] }, "$avgPlayers", null]
                     }
                 },
-                avgPlayers30d: { $avg: "$avgPlayers" }
+                avgPlayers30d: { $avg: "$avgPlayers" },
+                peakPlayers1d: {
+                    $max: {
+                        $cond: [{ $gte: ["$timestamp", start1d] }, "$maxPlayers", null]
+                    }
+                },
+                peakPlayers7d: {
+                    $max: {
+                        $cond: [{ $gte: ["$timestamp", start7d] }, "$maxPlayers", null]
+                    }
+                },
+                peakPlayers30d: { $max: "$maxPlayers" },
+                avgQueuePlayers1d: {
+                    $avg: {
+                        $cond: [{ $gte: ["$timestamp", start1d] }, "$avgQueue", null]
+                    }
+                },
+                avgQueuePlayers7d: {
+                    $avg: {
+                        $cond: [{ $gte: ["$timestamp", start7d] }, "$avgQueue", null]
+                    }
+                },
+                avgQueuePlayers30d: { $avg: "$avgQueue" }
             }
         },
         {
@@ -165,7 +187,13 @@ const updateServersAvgPlayers = async date => {
                 connect: "$_id",
                 avgPlayers1d: { $round: ["$avgPlayers1d", 2] },
                 avgPlayers7d: { $round: ["$avgPlayers7d", 2] },
-                avgPlayers30d: { $round: ["$avgPlayers30d", 2] }
+                avgPlayers30d: { $round: ["$avgPlayers30d", 2] },
+                peakPlayers1d: 1,
+                peakPlayers7d: 1,
+                peakPlayers30d: 1,
+                avgQueuePlayers1d: { $round: ["$avgQueuePlayers1d", 2] },
+                avgQueuePlayers7d: { $round: ["$avgQueuePlayers7d", 2] },
+                avgQueuePlayers30d: { $round: ["$avgQueuePlayers30d", 2] }
             }
         },
         {
