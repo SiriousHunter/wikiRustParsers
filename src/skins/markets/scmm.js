@@ -86,6 +86,10 @@ class SCMM extends BaseParser {
                     skin.itemShortName = 'rifle.lr300';
                 }
 
+                if(skin.iconAccentColourName) {
+                    skin.iconMainColor = skin.iconAccentColourName;
+                }
+
                 await models.skins.create(skin)
                     .catch(async err => {
                         if (err.code === 11000) {
@@ -117,6 +121,8 @@ class SCMM extends BaseParser {
                         description: des,
                         slugName: skin.name,
                         lang,
+                        iconMainColor: skin.iconMainColor,
+                        hasGlow: skin.hasGlow,
                         meta: [
                             {type: 'property', property: 'og:title', content: title},
                             {type: 'property', property: 'og:description', content: des},

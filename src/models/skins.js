@@ -34,6 +34,8 @@ const skinsSchema = mongoose.Schema({
         url: {type: String},
         updatedTime: {type: Date}
     }],
+    iconMainColor: {type: String},
+    hasGlow: {type: Boolean},
     prices: [{
         market: {type: String},
         buyPrice: {type: Number},
